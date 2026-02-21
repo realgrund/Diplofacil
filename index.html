@@ -15,31 +15,53 @@
             --law-action: #f97316; /* Laranja UNICV */
             --law-bg: #f8fafc; /* Fundo Gelo */
         }
-        body { font-family: 'Lexend', sans-serif; background-color: var(--law-bg); -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Lexend', sans-serif; background-color: var(--law-bg); -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
         .bg-law-primary { background-color: var(--law-primary); }
         .text-law-primary { color: var(--law-primary); }
         .bg-law-action { background-color: var(--law-action); }
         .text-law-action { color: var(--law-action); }
 
-        .screen { display: none; animation: slideUp 0.3s ease-out; }
+        /* Animações de Telas */
+        .screen { display: none; animation: fadeIn 0.2s ease-out; }
         .screen.active { display: block; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Telas Profundas (Imersão) */
+        .deep-screen {
+            position: fixed; inset: 0; background: var(--law-bg); z-index: 200;
+            transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow-y: auto; display: flex; flex-direction: column;
+        }
+        .deep-screen.open { transform: translateX(0); }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes popIn { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+        @keyframes pulse-scale { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
 
         .btn-3d { transition: all 0.1s; border-bottom-width: 5px; }
         .btn-3d:active { transform: translateY(3px); border-bottom-width: 0px; margin-bottom: 5px; }
+        .shake-error { animation: shake 0.4s ease-in-out; border-color: #ef4444 !important; background-color: #fef2f2 !important; color: #b91c1c !important; }
+        .correct-answer { border-color: #10b981 !important; background-color: #ecfdf5 !important; color: #047857 !important; }
 
         .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         
-        /* Floating Action Button */
         .fab { position: fixed; bottom: 85px; right: 20px; z-index: 60; animation: float 3s ease-in-out infinite; }
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+        /* Calendário Grid */
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+        .cal-day { aspect-ratio: 1; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; background: white; border: 2px solid #f1f5f9; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .cal-header { font-size: 10px; text-transform: uppercase; color: #94a3b8; font-weight: 800; text-align: center; margin-bottom: 4px; }
     </style>
 </head>
-<body class="text-slate-800 antialiased selection:bg-law-action selection:text-white pb-24">
+<body class="text-slate-800 antialiased pb-24">
 
-    <div id="login-screen" class="fixed inset-0 bg-law-primary z-[100] flex flex-col justify-center px-8 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]">
+    <audio id="sfx-success" src="https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3"></audio>
+    <audio id="sfx-error" src="https://assets.mixkit.co/active_storage/sfx/2955/2955-preview.mp3"></audio>
+    <audio id="sfx-countdown" src="https://assets.mixkit.co/active_storage/sfx/2018/2018-preview.mp3"></audio>
+
+    <div id="login-screen" class="fixed inset-0 bg-law-primary z-[300] flex flex-col justify-center px-8 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]">
         <div class="text-center mb-10">
             <div class="w-24 h-24 bg-white rounded-3xl mx-auto flex items-center justify-center shadow-2xl mb-6">
                 <i class="fas fa-owl text-5xl text-law-primary"></i>
@@ -48,13 +70,13 @@
             <p class="text-green-100 font-medium mt-2">UNICV - 3º Semestre Noturno</p>
         </div>
         <div class="space-y-4">
-            <input id="emailInput" type="email" placeholder="E-mail (ex: bruno@unicv)" class="w-full p-4 rounded-xl bg-white text-slate-800 font-bold placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-law-action shadow-lg">
-            <input id="passwordInput" type="password" placeholder="Senha (ex: 123)" class="w-full p-4 rounded-xl bg-white text-slate-800 font-bold placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-law-action shadow-lg">
-            <button onclick="doLogin()" class="w-full py-4 mt-4 bg-law-action text-white font-black rounded-xl btn-3d border-[#c25a11] text-lg shadow-xl uppercase">Acessar Plataforma</button>
+            <input type="email" placeholder="E-mail (ex: bruno@unicv)" class="w-full p-4 rounded-xl bg-white text-slate-800 font-bold focus:outline-none focus:ring-4 focus:ring-law-action shadow-lg">
+            <input type="password" placeholder="Senha (ex: 123)" class="w-full p-4 rounded-xl bg-white text-slate-800 font-bold focus:outline-none focus:ring-4 focus:ring-law-action shadow-lg">
+            <button onclick="doLogin()" class="w-full py-4 mt-4 bg-law-action text-white font-black rounded-xl btn-3d border-[#c25a11] text-lg shadow-xl uppercase">Acessar</button>
         </div>
     </div>
 
-    <div id="checkin-modal" class="fixed inset-0 bg-black/60 z-[120] hidden flex-col items-center justify-center px-5 backdrop-blur-sm">
+    <div id="checkin-modal" class="fixed inset-0 bg-black/60 z-[250] hidden flex-col items-center justify-center px-5 backdrop-blur-sm">
         <div class="bg-white rounded-[2rem] p-6 shadow-2xl w-full max-w-sm" style="animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
             <div class="flex items-center gap-3 mb-4">
                 <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-2xl border-2 border-green-200">👩‍🏫</div>
@@ -79,12 +101,12 @@
 
     <div id="main-app" class="hidden">
         
-        <header class="glass-panel fixed top-0 left-0 right-0 border-b border-gray-200 z-50 px-5 py-3 flex justify-between items-center shadow-sm">
+        <header class="glass-panel fixed top-0 left-0 right-0 border-b border-gray-200 z-40 px-5 py-3 flex justify-between items-center shadow-sm">
             <div class="flex items-center gap-2">
                 <div class="w-10 h-10 bg-law-primary rounded-xl flex items-center justify-center text-white"><i class="fas fa-owl"></i></div>
                 <span class="text-xl font-black text-law-primary">DiploFácil</span>
             </div>
-            <div id="xp-counter" class="flex items-center gap-1.5 bg-orange-100 px-3 py-1.5 rounded-xl font-black text-sm text-orange-800">
+            <div id="xp-counter" class="flex items-center gap-1.5 bg-orange-100 px-3 py-1.5 rounded-xl font-black text-sm text-orange-800 transition-transform">
                 <i class="fas fa-fire text-law-action"></i> <span>120 XP</span>
             </div>
         </header>
@@ -99,146 +121,204 @@
                 <i class="fas fa-file-signature absolute -right-4 -bottom-4 text-white/10 text-8xl rotate-12"></i>
             </div>
 
-            <div class="flex flex-col items-center space-y-10 relative pb-4">
-                <div class="absolute top-10 bottom-10 w-2 bg-gray-200 rounded-full -z-10"></div>
+            <div class="flex flex-col items-center space-y-12 relative pb-4">
+                <div class="absolute top-10 bottom-10 w-3 bg-gray-200 rounded-full -z-10"></div>
 
                 <div class="flex flex-col items-center relative">
-                    <button onclick="openLesson('contrato')" class="btn-3d w-24 h-24 bg-law-primary rounded-full flex items-center justify-center border-b-[6px] border-[#024a35] text-white text-4xl shadow-xl ring-8 ring-[var(--law-bg)]">
-                        <i class="fas fa-handshake"></i>
+                    <div class="absolute -top-10 bg-law-action text-white px-4 py-1.5 rounded-full font-black text-[10px] uppercase shadow-lg animate-bounce">Praticar</div>
+                    <button onclick="openDeepScreen('screen-quiz'); initQuiz();" class="btn-3d w-28 h-28 bg-law-primary rounded-full flex items-center justify-center border-b-[8px] border-[#024a35] text-white text-5xl shadow-2xl ring-8 ring-[var(--law-bg)]">
+                        <i class="fas fa-play ml-1"></i>
                     </button>
-                    <p class="font-black text-law-primary mt-3 text-sm text-center">Como funciona<br><span class="text-xs text-slate-400 font-normal">um contrato?</span></p>
+                    <p class="font-black text-law-primary mt-4 text-base text-center">Desafio de Contratos<br><span class="text-xs text-slate-400 font-bold uppercase">6 Questões</span></p>
                 </div>
 
-                <div class="flex flex-col items-center">
-                    <div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center border-b-[4px] border-green-700 text-white text-2xl shadow-md">
-                        <i class="fas fa-check"></i>
+                <div class="flex flex-col items-center opacity-60">
+                    <div class="w-20 h-20 bg-slate-300 rounded-full flex items-center justify-center border-b-[6px] border-slate-400 text-slate-500 text-3xl">
+                        <i class="fas fa-lock"></i>
                     </div>
-                    <p class="font-bold text-slate-400 mt-2 text-xs uppercase">Teoria da Agnição</p>
+                    <p class="font-bold text-slate-500 mt-2 text-xs uppercase">Evicção</p>
                 </div>
             </div>
         </main>
 
         <main id="screen-faltas" class="screen pt-24 px-5">
-            <h1 class="text-2xl font-black text-law-primary mb-2">Aulas Perdidas</h1>
+            <h1 class="text-2xl font-black text-law-primary mb-2">Diário de Faltas</h1>
+            <p class="text-slate-500 text-sm font-medium mb-6">Fevereiro 2026</p>
             
-            <div class="flex gap-2 overflow-x-auto no-scrollbar pb-4 mb-2">
-                <div class="bg-white border-2 border-gray-200 rounded-2xl min-w-[65px] p-2 flex flex-col items-center justify-center">
-                    <span class="text-[10px] font-bold">Seg</span><span class="text-lg font-black text-slate-400">10</span>
-                </div>
-                <div class="bg-red-50 border-2 border-red-200 rounded-2xl min-w-[65px] p-2 flex flex-col items-center justify-center relative shadow-sm">
-                    <div class="absolute -top-2 -right-1 bg-red-500 text-white text-[8px] px-1 rounded-full font-bold">FALTA</div>
-                    <span class="text-[10px] font-bold text-red-600">Ter</span><span class="text-lg font-black text-red-700">11</span>
-                </div>
-                <div class="bg-white border-2 border-law-action rounded-2xl min-w-[65px] p-2 flex flex-col items-center justify-center shadow-md">
-                    <span class="text-[10px] font-bold text-law-action">Hoje</span><span class="text-lg font-black text-law-action">12</span>
-                </div>
-                <div class="bg-white border-2 border-gray-100 rounded-2xl min-w-[65px] p-2 flex flex-col items-center justify-center opacity-50">
-                    <span class="text-[10px] font-bold">Qui</span><span class="text-lg font-black">13</span>
+            <div class="bg-white p-5 rounded-3xl shadow-sm border border-gray-200 mb-6">
+                <div class="calendar-grid mb-2">
+                    <div class="cal-header">D</div><div class="cal-header">S</div><div class="cal-header">T</div><div class="cal-header">Q</div><div class="cal-header">Q</div><div class="cal-header">S</div><div class="cal-header">S</div>
+                    <div class="cal-day opacity-30">25</div><div class="cal-day opacity-30">26</div><div class="cal-day opacity-30">27</div><div class="cal-day opacity-30">28</div><div class="cal-day opacity-30">29</div><div class="cal-day opacity-30">30</div><div class="cal-day opacity-30">31</div>
+                    <div class="cal-day">1</div><div class="cal-day">2</div><div class="cal-day">3</div><div class="cal-day">4</div><div class="cal-day">5</div><div class="cal-day">6</div><div class="cal-day">7</div>
+                    <div class="cal-day">8</div><div class="cal-day">9</div><div class="cal-day">10</div>
+                    
+                    <div class="cal-day bg-red-50 border-red-200 text-red-600 relative cursor-pointer shadow-md" onclick="alert('Falta registrada em Ambiental. Resumo ainda não gerado.')">
+                        11<div class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white"></div>
+                    </div>
+                    
+                    <div class="cal-day">12</div><div class="cal-day">13</div><div class="cal-day">14</div><div class="cal-day">15</div><div class="cal-day">16</div>
+                    
+                    <div class="cal-day bg-red-50 border-red-300 text-red-700 relative cursor-pointer shadow-md border-b-4 ring-2 ring-red-200" onclick="document.getElementById('resumo-falta').classList.remove('hidden')">
+                        17<div class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white animate-pulse"></div>
+                    </div>
+                    
+                    <div class="cal-day bg-law-primary text-white border-law-primary">18</div><div class="cal-day">19</div><div class="cal-day">20</div><div class="cal-day">21</div>
                 </div>
             </div>
 
-            <div class="bg-white rounded-3xl p-5 shadow-sm border border-gray-200">
-                <div class="flex gap-3 items-center mb-4 border-b pb-4">
-                    <div class="w-10 h-10 bg-law-primary text-white rounded-xl flex items-center justify-center"><i class="fas fa-gavel"></i></div>
+            <div id="resumo-falta" class="bg-white rounded-3xl p-5 shadow-xl border-2 border-red-100">
+                <div class="flex justify-between items-start mb-4">
                     <div>
-                        <h3 class="font-black text-slate-800 leading-none">Contratos</h3>
-                        <span class="text-xs text-slate-400 font-bold">Nulidade vs Anulabilidade</span>
+                        <span class="bg-red-100 text-red-600 text-[10px] font-black px-2 py-1 rounded-full uppercase">Falta - Dia 17/02</span>
+                        <h3 class="font-black text-slate-800 text-lg mt-2">Contratos: Nulidades</h3>
                     </div>
+                    <div class="w-10 h-10 bg-law-primary text-white rounded-xl flex items-center justify-center"><i class="fas fa-gavel"></i></div>
                 </div>
                 
-                <div class="space-y-3 mb-6">
-                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                        <p class="text-[10px] font-black text-law-action uppercase mb-1">Pergunta do Dia:</p>
-                        <p class="text-sm font-semibold text-slate-700">Qual a diferença grave entre Nulidade e Anulabilidade?</p>
-                    </div>
-                    <div class="bg-green-50 p-3 rounded-xl border border-green-100 flex gap-2">
-                        <i class="fas fa-robot text-law-primary mt-1"></i>
-                        <p class="text-xs font-medium text-slate-600"><b>IA:</b> Nulidade é interesse público (juiz pode dar de ofício e não prescreve). Anulabilidade é interesse privado (só o prejudicado reclama e pode ser sanada).</p>
-                    </div>
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 mb-2">
+                    <p class="text-[10px] font-black text-law-action uppercase mb-1">O que a Juliana perguntou hoje:</p>
+                    <p class="text-sm font-bold text-slate-700">"Um contrato nulo pode ser perdoado com o tempo?"</p>
                 </div>
-                <button onclick="openLesson('nulidade')" class="w-full py-3 bg-law-primary text-white font-black rounded-xl btn-3d border-[#024a35]">LER RESUMO COMPLETO</button>
+                <div class="bg-green-50 p-3 rounded-xl border border-green-100 flex gap-2 mb-6">
+                    <i class="fas fa-robot text-law-primary mt-1"></i>
+                    <p class="text-xs font-medium text-slate-600"><b>IA:</b> Não! A nulidade (Art. 166) ofende a ordem pública, não prescreve e não pode ser validada. Só a Anulabilidade (Art. 171) pode convalescer.</p>
+                </div>
+                <button onclick="openDeepScreen('screen-resumo-completo')" class="w-full py-4 bg-law-primary text-white font-black rounded-xl btn-3d border-[#024a35] shadow-md flex justify-center items-center gap-2">
+                    <i class="fas fa-book-open"></i> LER MEGA RESUMO
+                </button>
             </div>
         </main>
 
         <main id="screen-resumos" class="screen pt-24 px-5">
-            <h1 class="text-2xl font-black text-law-primary mb-6">Cadernos & Áudios</h1>
+            <h1 class="text-2xl font-black text-law-primary mb-6">Materiais de Estudo</h1>
             
             <div class="space-y-4">
                 <div class="bg-white p-4 rounded-3xl border-2 border-law-action shadow-sm relative overflow-hidden">
                     <div class="absolute top-0 left-0 w-2 h-full bg-law-action"></div>
-                    <span class="bg-orange-100 text-law-action text-[9px] font-black px-2 py-0.5 rounded-md uppercase ml-3">Podcast da Aula</span>
-                    <h3 class="font-bold text-slate-800 mt-1 ml-3 mb-3">Juliana - Aula de Contratos</h3>
+                    <span class="bg-orange-100 text-law-action text-[9px] font-black px-2 py-0.5 rounded-md uppercase ml-3">Podcast Oficial</span>
+                    <h3 class="font-bold text-slate-800 mt-1 ml-3 mb-3">Aula de Contratos (Juliana)</h3>
                     <iframe src="https://drive.google.com/file/d/1qQtEYkRNuk6P2oxYJkduGvFOhNbd0E5u/preview" width="100%" height="100" class="rounded-xl" allow="autoplay"></iframe>
                 </div>
 
-                <button onclick="openLesson('contrato')" class="w-full text-left bg-white p-5 rounded-3xl border border-gray-200 shadow-sm flex items-center gap-4 btn-3d active:transform-none">
-                    <div class="w-12 h-12 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center text-xl"><i class="fas fa-file-pdf"></i></div>
+                <button onclick="openDeepScreen('screen-resumo-completo')" class="w-full text-left bg-white p-5 rounded-3xl border-2 border-law-primary shadow-md flex items-center gap-4 btn-3d active:transform-none transition-transform hover:scale-[1.02]">
+                    <div class="w-12 h-12 bg-green-50 text-law-primary rounded-2xl flex items-center justify-center text-xl"><i class="fas fa-file-alt"></i></div>
                     <div class="flex-1">
-                        <h3 class="font-bold text-slate-800 text-sm">Anotações da Lousa</h3>
-                        <p class="text-[10px] text-slate-400 font-bold mt-1">Mapa mental formatado por IA</p>
+                        <span class="bg-law-primary text-white text-[9px] font-black px-2 py-0.5 rounded-md uppercase mb-1 inline-block">Mega Resumo</span>
+                        <h3 class="font-black text-slate-800 text-base">Direito Contratual</h3>
+                        <p class="text-[10px] text-slate-500 font-bold mt-1">Anotações da lousa + PDF.</p>
                     </div>
-                    <i class="fas fa-chevron-right text-gray-300"></i>
+                    <i class="fas fa-chevron-right text-law-primary"></i>
+                </button>
+
+                <h3 class="font-bold text-slate-500 text-xs uppercase tracking-widest mt-6 mb-2">Outras Matérias (7/7)</h3>
+                
+                <button onclick="openPaywall()" class="w-full text-left bg-slate-50 p-4 rounded-2xl border border-gray-200 flex items-center gap-4 opacity-70">
+                    <div class="w-10 h-10 bg-slate-200 text-slate-400 rounded-xl flex items-center justify-center"><i class="fas fa-tree"></i></div>
+                    <div class="flex-1"><h3 class="font-bold text-slate-700">Ambiental e Urbanístico</h3></div>
+                    <i class="fas fa-lock text-slate-400"></i>
+                </button>
+                <button onclick="openPaywall()" class="w-full text-left bg-slate-50 p-4 rounded-2xl border border-gray-200 flex items-center gap-4 opacity-70">
+                    <div class="w-10 h-10 bg-slate-200 text-slate-400 rounded-xl flex items-center justify-center"><i class="fas fa-balance-scale"></i></div>
+                    <div class="flex-1"><h3 class="font-bold text-slate-700">Teoria Geral do Processo</h3></div>
+                    <i class="fas fa-lock text-slate-400"></i>
+                </button>
+                <button onclick="openPaywall()" class="w-full text-left bg-slate-50 p-4 rounded-2xl border border-gray-200 flex items-center gap-4 opacity-70">
+                    <div class="w-10 h-10 bg-slate-200 text-slate-400 rounded-xl flex items-center justify-center"><i class="fas fa-book"></i></div>
+                    <div class="flex-1"><h3 class="font-bold text-slate-700">Filosofia Jurídica</h3></div>
+                    <i class="fas fa-lock text-slate-400"></i>
                 </button>
             </div>
         </main>
 
         <main id="screen-simulados" class="screen pt-24 px-5">
-            <h1 class="text-2xl font-black text-law-primary mb-6">Prática Penal e Civil</h1>
+            <h1 class="text-2xl font-black text-law-primary mb-2">Prática para Provas</h1>
+            <p class="text-slate-500 text-sm font-medium mb-6">Volume total: 7 Matérias + OAB</p>
 
-            <div class="bg-white p-5 rounded-2xl border-2 border-gray-200 mb-6 flex justify-between items-center shadow-sm">
-                <div>
-                    <span class="text-[10px] font-black text-green-500 uppercase">Liberado</span>
-                    <h4 class="font-black text-slate-800 mt-1">Simulado de Contratos</h4>
-                    <p class="text-xs text-slate-500 font-medium">10 questões • Baseado na Aula 1</p>
+            <div class="bg-law-primary p-6 rounded-3xl border-2 border-[#024a35] mb-8 shadow-xl text-white relative overflow-hidden">
+                <i class="fas fa-file-contract absolute -right-4 -bottom-4 text-white/10 text-8xl rotate-12"></i>
+                <div class="relative z-10">
+                    <span class="bg-law-action text-white text-[10px] font-black px-2 py-1 rounded-full uppercase shadow-md">Liberado</span>
+                    <h3 class="text-2xl font-black mt-3 mb-1">Simulado Real: Contratos</h3>
+                    <p class="text-sm text-green-100 font-medium mb-6"><i class="fas fa-clock mr-1"></i> 10 questões • Baseado na Aula 1</p>
+                    <button onclick="startCountdown()" class="w-full py-4 bg-white text-law-primary font-black rounded-xl btn-3d border-gray-300 shadow-lg flex justify-center items-center gap-2">
+                        <i class="fas fa-play text-law-action"></i> INICIAR SIMULADO
+                    </button>
                 </div>
-                <button class="w-12 h-12 bg-law-primary text-white rounded-full font-bold btn-3d border-[#024a35]"><i class="fas fa-play"></i></button>
             </div>
 
-            <div class="bg-slate-100 p-6 rounded-3xl border-2 border-dashed border-slate-300 text-center">
-                <i class="fas fa-lock text-3xl text-slate-400 mb-3"></i>
-                <h3 class="font-bold text-slate-700 mb-2">Simulados Avançados</h3>
-                <p class="text-xs text-slate-500 mb-4">Acesse provas passadas da UNICV e simulados da OAB trancados.</p>
-                <button onclick="openPaywall()" class="w-full py-3 bg-law-action text-white font-black rounded-xl btn-3d border-orange-700">DESBLOQUEAR TUDO</button>
+            <h3 class="font-bold text-slate-500 text-xs uppercase tracking-widest mb-3">Simulados Premium</h3>
+            <div class="grid grid-cols-2 gap-3">
+                <button onclick="openPaywall()" class="bg-white p-4 rounded-2xl border border-gray-200 text-center shadow-sm opacity-80">
+                    <i class="fas fa-lock text-xl text-slate-300 mb-2"></i><h4 class="font-bold text-slate-700 text-sm">TGP</h4>
+                </button>
+                <button onclick="openPaywall()" class="bg-white p-4 rounded-2xl border border-gray-200 text-center shadow-sm opacity-80">
+                    <i class="fas fa-lock text-xl text-slate-300 mb-2"></i><h4 class="font-bold text-slate-700 text-sm">Ambiental</h4>
+                </button>
             </div>
         </main>
 
         <main id="screen-comunidade" class="screen pt-24 px-5">
-            <h1 class="text-2xl font-black text-law-primary mb-4">A Tropa do 3º Semestre</h1>
+            <h1 class="text-2xl font-black text-law-primary mb-6">Nossa Turma</h1>
             
-            <div onclick="openPaywall()" class="bg-gradient-to-r from-law-primary to-green-600 p-5 rounded-3xl text-white shadow-lg mb-8 flex justify-between items-center cursor-pointer transform transition hover:scale-[1.02]">
-                <div>
-                    <span class="bg-white/20 text-[9px] font-black px-2 py-0.5 rounded-md uppercase">Grupo VIP WhatsApp</span>
-                    <h3 class="font-black mt-2 text-lg">A Elite do Direito</h3>
-                    <p class="text-xs text-green-100 mt-1">Acesso antecipado a resumos.</p>
-                </div>
-                <div class="w-10 h-10 bg-white/20 rounded-full flex justify-center items-center"><i class="fas fa-lock"></i></div>
+            <div class="grid grid-cols-2 gap-3 mb-8">
+                <a href="#" onclick="openPaywall()" class="bg-slate-800 text-white p-4 rounded-2xl flex flex-col items-center justify-center text-center shadow-lg border-b-4 border-slate-900 active:translate-y-1 active:border-b-0 transition-all">
+                    <i class="fab fa-whatsapp text-3xl text-law-action mb-2"></i>
+                    <h3 class="font-black text-sm">Acesso VIP</h3>
+                    <p class="text-[9px] text-slate-400 font-bold uppercase mt-1">Materiais Antecipados</p>
+                </a>
+                <a href="#" class="bg-white text-slate-700 p-4 rounded-2xl flex flex-col items-center justify-center text-center shadow-sm border-2 border-green-500 active:translate-y-1 active:border-b-0 transition-all">
+                    <i class="fab fa-whatsapp text-3xl text-green-500 mb-2"></i>
+                    <h3 class="font-black text-sm">Grupo da Sala</h3>
+                    <p class="text-[9px] text-slate-400 font-bold uppercase mt-1">Aberto a todos</p>
+                </a>
             </div>
 
-            <h3 class="font-bold text-slate-500 text-sm mb-3">Corrida de XP (Ranking)</h3>
+            <div class="flex justify-between items-end mb-3">
+                <h3 class="font-bold text-slate-600 text-sm">Ranking (Corrida XP)</h3>
+                <span class="text-xs font-bold text-law-action uppercase">Fev/26</span>
+            </div>
+            
             <div class="bg-white border border-gray-200 rounded-3xl p-3 shadow-sm space-y-3">
-                <div class="flex items-center gap-3 bg-orange-50 p-3 rounded-2xl border border-orange-100 relative overflow-hidden">
-                    <div class="absolute left-0 top-0 bottom-0 w-1 bg-law-action"></div>
-                    <span class="font-black text-law-action text-lg w-5">1</span>
+                <div class="flex items-center gap-3 bg-orange-50 p-3 rounded-2xl border border-orange-200 relative">
+                    <span class="font-black text-law-action text-lg w-5 text-center">1</span>
                     <div class="w-10 h-10 bg-law-action text-white rounded-full flex items-center justify-center font-bold">B</div>
                     <div class="flex-1">
-                        <h3 class="font-bold text-sm text-slate-800">Bruno F.</h3>
-                        <div class="w-full bg-orange-200 h-1.5 rounded-full mt-1"><div class="bg-law-action h-1.5 rounded-full" style="width: 100%"></div></div>
+                        <div class="flex items-center gap-2">
+                            <h3 class="font-bold text-sm text-slate-800">Bruno F.</h3>
+                            <span class="bg-law-primary text-white text-[8px] px-1.5 py-0.5 rounded font-black uppercase tracking-widest">Plano OAB</span>
+                        </div>
+                        <div class="w-full bg-orange-200 h-1.5 rounded-full mt-1.5"><div class="bg-law-action h-1.5 rounded-full" style="width: 100%"></div></div>
                     </div>
-                    <span class="text-[10px] font-black text-law-action">3.450 XP</span>
+                    <span class="text-[10px] font-black text-law-action text-right">3.450<br>XP</span>
                 </div>
                 <div class="flex items-center gap-3 p-3">
-                    <span class="font-bold text-slate-400 w-5">2</span>
+                    <span class="font-bold text-slate-400 w-5 text-center">2</span>
                     <div class="w-10 h-10 bg-slate-200 text-slate-600 rounded-full flex items-center justify-center font-bold">J</div>
                     <div class="flex-1">
-                        <h3 class="font-bold text-sm text-slate-700">João P.</h3>
-                        <div class="w-full bg-slate-200 h-1.5 rounded-full mt-1"><div class="bg-slate-400 h-1.5 rounded-full" style="width: 80%"></div></div>
+                        <div class="flex items-center gap-2">
+                            <h3 class="font-bold text-sm text-slate-700">João P.</h3>
+                            <span class="bg-blue-500 text-white text-[8px] px-1.5 py-0.5 rounded font-black uppercase tracking-widest">PRO</span>
+                        </div>
+                        <div class="w-full bg-slate-200 h-1.5 rounded-full mt-1.5"><div class="bg-slate-400 h-1.5 rounded-full" style="width: 80%"></div></div>
                     </div>
-                    <span class="text-[10px] font-bold text-slate-400">2.900 XP</span>
+                    <span class="text-[10px] font-bold text-slate-400 text-right">2.900<br>XP</span>
+                </div>
+                <div class="flex items-center gap-3 p-3">
+                    <span class="font-bold text-slate-400 w-5 text-center">3</span>
+                    <div class="w-10 h-10 bg-slate-100 text-slate-500 rounded-full flex items-center justify-center font-bold">K</div>
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2">
+                            <h3 class="font-bold text-sm text-slate-700">Karla</h3>
+                            <span class="bg-gray-200 text-gray-500 text-[8px] px-1.5 py-0.5 rounded font-black uppercase tracking-widest">FREE</span>
+                        </div>
+                        <div class="w-full bg-slate-200 h-1.5 rounded-full mt-1.5"><div class="bg-slate-300 h-1.5 rounded-full" style="width: 40%"></div></div>
+                    </div>
+                    <span class="text-[10px] font-bold text-slate-400 text-right">1.200<br>XP</span>
                 </div>
             </div>
         </main>
 
-        <nav class="glass-panel fixed bottom-0 left-0 right-0 border-t border-gray-200 pb-safe z-50 px-2">
+        <nav class="glass-panel fixed bottom-0 left-0 right-0 border-t border-gray-200 pb-[env(safe-area-inset-bottom,20px)] z-30 px-2">
             <div class="flex justify-between items-center pt-2 pb-4">
                 <button onclick="navigate('trilha')" class="nav-btn text-law-primary flex flex-col items-center gap-1 w-[20%]" data-target="trilha">
                     <i class="fas fa-route text-xl"></i><span class="text-[9px] font-black uppercase tracking-tighter">Trilha</span>
@@ -262,6 +342,78 @@
             <i class="fas fa-rocket"></i>
         </button>
 
+    </div> <div id="screen-quiz" class="deep-screen">
+        <div class="px-5 py-4 flex items-center gap-4 bg-white border-b shadow-sm sticky top-0 z-10">
+            <button onclick="closeDeepScreen('screen-quiz')" class="text-slate-400 text-2xl"><i class="fas fa-times"></i></button>
+            <div class="flex-1 bg-slate-100 h-4 rounded-full overflow-hidden p-0.5">
+                <div id="quiz-progress" class="bg-green-500 h-full w-[10%] rounded-full transition-all duration-300"></div>
+            </div>
+            <i class="fas fa-heart text-red-500 text-xl"></i>
+        </div>
+        
+        <div class="flex-1 px-5 py-8 flex flex-col" id="quiz-container">
+            <h2 class="text-2xl font-black text-slate-800 mb-8 leading-snug" id="quiz-question">O que é um contrato segundo a doutrina?</h2>
+            
+            <div class="space-y-4 w-full" id="quiz-options">
+                </div>
+            
+            <div class="mt-auto pt-8">
+                <button id="quiz-btn" onclick="checkAnswer()" class="w-full py-4 bg-slate-200 text-slate-400 font-black rounded-xl btn-3d pointer-events-none">VERIFICAR</button>
+            </div>
+        </div>
+
+        <div id="quiz-success" class="hidden flex-1 flex-col items-center justify-center p-8 text-center">
+            <div class="w-32 h-32 bg-green-100 rounded-full flex items-center justify-center mb-6 shadow-lg shadow-green-200">
+                <i class="fas fa-check text-6xl text-green-500"></i>
+            </div>
+            <h2 class="text-3xl font-black text-law-primary mb-2">Perfeito!</h2>
+            <p class="text-slate-500 font-bold mb-8">+100 XP adicionados ao seu perfil.</p>
+            <button onclick="closeDeepScreen('screen-quiz')" class="w-full py-4 bg-law-primary text-white font-black rounded-xl btn-3d border-[#024a35]">VOLTAR À TRILHA</button>
+        </div>
+    </div>
+
+    <div id="screen-resumo-completo" class="deep-screen">
+        <div class="px-5 py-4 flex items-center justify-between bg-law-primary text-white border-b border-[#024a35] sticky top-0 z-10 shadow-md">
+            <button onclick="closeDeepScreen('screen-resumo-completo')" class="text-white text-2xl"><i class="fas fa-arrow-left"></i></button>
+            <span class="font-black text-lg">Mega Resumo</span>
+            <i class="fas fa-bookmark"></i>
+        </div>
+        
+        <div class="p-6 bg-white flex-1">
+            <span class="bg-orange-100 text-law-action text-[10px] font-black px-2 py-1 rounded-md uppercase">Aula 1 e 2</span>
+            <h1 class="text-3xl font-black text-slate-800 mt-2 mb-6">Direito Contratual: Formação e Nulidades</h1>
+            
+            <p class="text-slate-600 font-medium leading-relaxed mb-6">O contrato é a fonte mais importante das obrigações, configurando-se como um <b>negócio jurídico bilateral</b> que depende da convergência de vontades.</p>
+
+            <h3 class="font-black text-law-primary text-lg mb-3 flex items-center gap-2"><i class="fas fa-paper-plane text-law-action"></i> Formação (Teoria da Agnição)</h3>
+            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 mb-6">
+                <p class="text-sm text-slate-700">O Brasil adota como regra a <b>Teoria da Expedição</b> (Art. 434). O contrato entre ausentes torna-se perfeito no momento em que a aceitação é expedida (enviada).<br><br><b>Exceções (quando a expedição não basta):</b><br>1. Se a retratação chegar antes ou junto.<br>2. Se houver compromisso de espera.<br>3. Se não chegar no prazo estipulado.</p>
+            </div>
+
+            <h3 class="font-black text-law-primary text-lg mb-3 flex items-center gap-2"><i class="fas fa-balance-scale-left text-law-action"></i> Nulidade vs Anulabilidade</h3>
+            <table class="w-full text-left text-sm mb-6 border-collapse">
+                <thead><tr class="bg-slate-100 text-slate-700 font-bold"><th class="p-3 rounded-tl-xl">Critério</th><th class="p-3">Nulidade (Art 166)</th><th class="p-3 rounded-tr-xl">Anulabilidade (Art 171)</th></tr></thead>
+                <tbody>
+                    <tr class="border-b border-slate-100"><td class="p-3 font-bold text-slate-600">Interesse</td><td class="p-3 text-red-600 font-bold">Público</td><td class="p-3 text-orange-500 font-bold">Privado</td></tr>
+                    <tr class="border-b border-slate-100"><td class="p-3 font-bold text-slate-600">Juiz</td><td class="p-3">Pode dar de ofício</td><td class="p-3">Não pode dar de ofício</td></tr>
+                    <tr><td class="p-3 font-bold text-slate-600 rounded-bl-xl">Prescreve?</td><td class="p-3">Não prescreve</td><td class="p-3">Convalesce no tempo</td></tr>
+                </tbody>
+            </table>
+
+            <h3 class="font-black text-law-primary text-lg mb-3 flex items-center gap-2"><i class="fas fa-house-damage text-law-action"></i> Evicção e Vícios</h3>
+            <div class="bg-red-50 p-4 rounded-2xl border border-red-100 mb-8">
+                <p class="text-sm text-slate-700 mb-3"><b>Vício Redibitório:</b> Defeito oculto na coisa que a torna imprópria ou diminui o valor. (Ex: Carro que funde o motor no dia seguinte).</p>
+                <p class="text-sm text-slate-700"><b>Evicção:</b> Perda da coisa por decisão judicial ou administrativa que a atribui a terceiro (Ex: Comprar um terreno que já tinha outro dono oficial).</p>
+            </div>
+            
+            <button onclick="closeDeepScreen('screen-resumo-completo')" class="w-full py-4 bg-slate-800 text-white font-black rounded-xl btn-3d border-slate-900 shadow-md">CONCLUÍDO</button>
+        </div>
+    </div>
+
+    <div id="countdown-overlay" class="fixed inset-0 bg-law-primary z-[400] hidden flex-col items-center justify-center">
+        <h2 class="text-white font-black text-2xl mb-8 uppercase tracking-widest text-center px-8">Preparando<br>Simulado de Contratos</h2>
+        <div id="countdown-number" class="text-[150px] font-black text-white" style="text-shadow: 0 10px 30px rgba(0,0,0,0.3);">3</div>
+        <div class="w-16 h-1 bg-white/30 rounded-full mt-10 overflow-hidden"><div class="w-full h-full bg-law-action animate-pulse"></div></div>
     </div>
 
     <div id="novidades-modal" class="fixed inset-0 bg-black/50 z-[150] hidden flex-col justify-end">
@@ -272,16 +424,10 @@
             </div>
             <div class="space-y-4">
                 <div class="flex items-center gap-4 bg-purple-50 p-4 rounded-2xl border border-purple-100">
-                    <div class="text-3xl">🤖</div>
-                    <div><h4 class="font-black text-purple-900">IA Assistente Pessoal</h4><p class="text-xs text-purple-700">Tire dúvidas jurídicas 24h.</p></div>
+                    <div class="text-3xl">🤖</div><div><h4 class="font-black text-purple-900">IA Assistente</h4><p class="text-xs text-purple-700">Tire dúvidas jurídicas 24h.</p></div>
                 </div>
                 <div class="flex items-center gap-4 bg-blue-50 p-4 rounded-2xl border border-blue-100">
-                    <div class="text-3xl">👴</div>
-                    <div><h4 class="font-black text-blue-900">Podcast com Prof. Joaquim</h4><p class="text-xs text-blue-700">Histórias do cotidiano jurídico.</p></div>
-                </div>
-                <div class="flex items-center gap-4 bg-orange-50 p-4 rounded-2xl border border-orange-100">
-                    <div class="text-3xl">🎙️</div>
-                    <div><h4 class="font-black text-orange-900">Palestras Exclusivas</h4><p class="text-xs text-orange-700">Eventos para a comunidade.</p></div>
+                    <div class="text-3xl">👴</div><div><h4 class="font-black text-blue-900">Podcast do Joaquim</h4><p class="text-xs text-blue-700">Histórias do cotidiano.</p></div>
                 </div>
             </div>
         </div>
@@ -290,82 +436,29 @@
     <div id="paywall-modal" class="fixed inset-0 bg-law-primary z-[200] hidden flex-col overflow-y-auto">
         <button onclick="document.getElementById('paywall-modal').classList.add('hidden')" class="absolute top-6 right-6 text-white text-2xl bg-black/20 w-10 h-10 rounded-full"><i class="fas fa-times"></i></button>
         <div class="p-8 pt-20 text-center">
-            <span class="bg-law-action text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-lg">Plano Premium</span>
+            <span class="bg-law-action text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-lg">Plano OAB</span>
             <h2 class="text-4xl font-black text-white mt-6 mb-2">Auxílio 1ª Fase OAB</h2>
             <p class="text-green-100 font-medium mb-8">A preparação definitiva para você não depender de sorte.</p>
             
             <div class="bg-white rounded-3xl p-6 text-left shadow-2xl relative">
                 <div class="absolute -top-4 right-6 bg-red-500 text-white text-[10px] font-black px-2 py-1 rounded shadow-md transform rotate-3">VAGAS LIMITADAS</div>
                 <div class="flex items-end gap-1 mb-6 border-b border-gray-100 pb-4">
-                    <span class="text-sm font-bold text-slate-400">R$</span>
-                    <span class="text-5xl font-black text-law-primary">129</span>
-                    <span class="text-sm font-bold text-slate-400">,90 /mês</span>
+                    <span class="text-sm font-bold text-slate-400">R$</span><span class="text-5xl font-black text-law-primary">129</span><span class="text-sm font-bold text-slate-400">,90 /mês</span>
                 </div>
                 <ul class="space-y-4 mb-8">
-                    <li class="flex gap-3 items-start"><i class="fas fa-check-circle text-law-action mt-0.5 text-lg"></i><span class="text-sm font-bold text-slate-600">Simulados de anos anteriores da OAB e UNICV.</span></li>
-                    <li class="flex gap-3 items-start"><i class="fas fa-check-circle text-law-action mt-0.5 text-lg"></i><span class="text-sm font-bold text-slate-600">Expectativa de nota gerada por IA.</span></li>
-                    <li class="flex gap-3 items-start"><i class="fas fa-check-circle text-law-action mt-0.5 text-lg"></i><span class="text-sm font-bold text-slate-600">Acesso VIP a trilha personalizada.</span></li>
-                    <li class="flex gap-3 items-start"><i class="fas fa-check-circle text-law-action mt-0.5 text-lg"></i><span class="text-sm font-bold text-slate-600">Calls e Mentoria online com Professores.</span></li>
+                    <li class="flex gap-3 items-start"><i class="fas fa-check-circle text-law-action mt-0.5 text-lg"></i><span class="text-sm font-bold text-slate-600">Simulados OAB anteriores.</span></li>
+                    <li class="flex gap-3 items-start"><i class="fas fa-check-circle text-law-action mt-0.5 text-lg"></i><span class="text-sm font-bold text-slate-600">Expectativa de nota por IA.</span></li>
+                    <li class="flex gap-3 items-start"><i class="fas fa-check-circle text-law-action mt-0.5 text-lg"></i><span class="text-sm font-bold text-slate-600">Trilha personalizada e Calls VIP.</span></li>
                 </ul>
-                <button onclick="alert('Redirecionando para o Gateway de Pagamento...')" class="w-full py-5 bg-law-action text-white font-black rounded-2xl btn-3d border-orange-700 text-lg">ASSINAR AGORA</button>
+                <button onclick="alert('Redirecionando para o Pagamento...')" class="w-full py-5 bg-law-action text-white font-black rounded-2xl btn-3d border-orange-700 text-lg">ASSINAR AGORA</button>
             </div>
         </div>
     </div>
 
-    <main id="lesson-modal" class="fixed inset-0 bg-law-bg z-[150] hidden flex-col transition-transform duration-300 transform translate-y-full">
-        <div class="px-5 py-4 flex items-center gap-4 bg-white border-b shadow-sm">
-            <button onclick="closeLesson()" class="text-slate-400 text-2xl"><i class="fas fa-times"></i></button>
-            <div class="flex-1 bg-slate-100 h-3 rounded-full"><div class="bg-law-action h-full w-full rounded-full"></div></div>
-        </div>
-        <div class="flex-1 overflow-y-auto p-6" id="lesson-content">
-            </div>
-        <div class="p-5 bg-white border-t"><button onclick="closeLesson()" class="w-full py-4 bg-law-primary text-white font-black rounded-xl btn-3d border-[#024a35]">ENTENDI</button></div>
-    </main>
-
     <script>
-        const conteudos = {
-            'contrato': `
-                <div class="bg-white rounded-[2rem] p-6 shadow-xl border border-gray-100 text-center">
-                    <div class="bg-law-primary text-white px-3 py-1 rounded-full text-[10px] font-black uppercase inline-block mb-4">Conceito Base</div>
-                    <h2 class="text-2xl font-black text-slate-800 mb-6">O que é um Contrato?</h2>
-                    <i class="fas fa-handshake text-5xl text-law-action mb-6"></i>
-                    <p class="text-slate-600 font-medium text-sm leading-relaxed mb-4 text-left">
-                        O contrato é a fonte mais importante das obrigações. É um <b>negócio jurídico bilateral ou plurilateral</b> que depende do acordo de vontades para sua formação.
-                    </p>
-                    <div class="bg-orange-50 p-4 rounded-xl border border-orange-100 text-left">
-                        <p class="text-xs text-orange-800 font-bold"><i class="fas fa-lightbulb text-law-action mr-1"></i> Dica de Prova:</p>
-                        <p class="text-xs text-orange-900 mt-1">A forma é livre (podendo ser verbal), mas contratos de alto valor exigem forma escrita por segurança!</p>
-                    </div>
-                </div>`,
-            'nulidade': `
-                <div class="bg-white rounded-[2rem] p-6 shadow-xl border border-gray-100">
-                    <h2 class="text-xl font-black text-slate-800 mb-6 text-center">Nulidade vs Anulabilidade</h2>
-                    
-                    <div class="bg-red-50 p-4 rounded-2xl mb-4 border border-red-100">
-                        <h3 class="font-black text-red-700 text-sm mb-2"><i class="fas fa-times-circle"></i> Nulidade (Art. 166 CC)</h3>
-                        <ul class="text-xs text-red-900 space-y-1 ml-4 list-disc">
-                            <li>Invalidade GRAVE.</li>
-                            <li>Interesse de todos (Ordem Pública).</li>
-                            <li>Juiz DEVE reconhecer de ofício.</li>
-                            <li>Não prescreve com o tempo.</li>
-                        </ul>
-                    </div>
-
-                    <div class="bg-yellow-50 p-4 rounded-2xl border border-yellow-200">
-                        <h3 class="font-black text-yellow-700 text-sm mb-2"><i class="fas fa-exclamation-triangle"></i> Anulabilidade (Art. 171 CC)</h3>
-                        <ul class="text-xs text-yellow-900 space-y-1 ml-4 list-disc">
-                            <li>Invalidade LEVE.</li>
-                            <li>Interesse Privado (Prejudicado).</li>
-                            <li>Pode convalescer (ser perdoado) com o tempo.</li>
-                            <li>SÓ o prejudicado pode alegar.</li>
-                        </ul>
-                    </div>
-                </div>`
-        };
-
+        // CORE: Login & Checkin
         function doLogin() {
             document.getElementById('login-screen').classList.add('hidden');
-            // Mostra o Check-in primeiro
             document.getElementById('checkin-modal').classList.remove('hidden');
             document.getElementById('checkin-modal').classList.add('flex');
         }
@@ -373,50 +466,172 @@
         function answerCheckin(response) {
             document.getElementById('checkin-modal').classList.add('hidden');
             document.getElementById('main-app').classList.remove('hidden');
-            
-            if(response === 'presente') {
-                // Simula ganho de XP
-                const xp = document.getElementById('xp-counter');
-                xp.classList.add('scale-110', 'bg-green-100', 'text-green-800');
-                xp.innerHTML = '<i class="fas fa-arrow-up text-green-600"></i> <span>170 XP</span>';
-                setTimeout(() => xp.classList.remove('scale-110'), 300);
-            } else {
-                navigate('faltas');
-            }
+            if(response === 'presente') playSound('sfx-success');
+            else navigate('faltas');
         }
 
+        // CORE: Navegação Abas vs Deep Screens
         function navigate(screenId) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById('screen-' + screenId).classList.add('active');
             
             document.querySelectorAll('.nav-btn').forEach(btn => {
-                if(btn.dataset.target === screenId) {
-                    btn.classList.replace('text-slate-400', 'text-law-primary');
-                } else {
-                    btn.classList.replace('text-law-primary', 'text-slate-400');
-                }
+                if(btn.dataset.target === screenId) btn.classList.replace('text-slate-400', 'text-law-primary');
+                else btn.classList.replace('text-law-primary', 'text-slate-400');
             });
             window.scrollTo(0, 0);
         }
 
-        function openLesson(id) {
-            document.getElementById('lesson-content').innerHTML = conteudos[id];
-            const modal = document.getElementById('lesson-modal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            setTimeout(() => modal.classList.remove('translate-y-full'), 50);
+        function openDeepScreen(id) { document.getElementById(id).classList.add('open'); }
+        function closeDeepScreen(id) { document.getElementById(id).classList.remove('open'); }
+        function openPaywall() { document.getElementById('paywall-modal').classList.remove('hidden'); document.getElementById('paywall-modal').classList.add('flex'); }
+
+        // AUDIO SYSTEM
+        function playSound(id) {
+            try { const audio = document.getElementById(id); audio.currentTime = 0; audio.play().catch(e => console.log("Áudio bloqueado pelo browser")); } 
+            catch(e) {}
         }
 
-        function closeLesson() {
-            const modal = document.getElementById('lesson-modal');
-            modal.classList.add('translate-y-full');
-            setTimeout(() => { modal.classList.remove('flex'); modal.classList.add('hidden'); }, 300);
+        // GAME: Quiz de Contratos
+        const questoes = [
+            { q: "Qual a natureza de um Contrato?", o: ["Ato Ilícito", "Negócio Jurídico Bilateral", "Declaração Unilateral"], a: 1 },
+            { q: "O Brasil adota a Teoria da Agnição em qual modalidade?", o: ["Declaração", "Recepção", "Expedição"], a: 2 },
+            { q: "Qual NÃO é uma exceção à regra da Expedição?", o: ["Retratação oportuna", "Contrato de alto valor", "Atraso na chegada"], a: 1 },
+            { q: "A Nulidade de um contrato atende a qual interesse?", o: ["Apenas do prejudicado", "De Ordem Pública (Todos)", "Do Juiz unicamente"], a: 1 },
+            { q: "A Anulabilidade (Art. 171) pode ser sanada com o tempo?", o: ["Sim, ela convalesce.", "Não, ela é eterna.", "Depende do valor."], a: 0 },
+            { q: "O que é Evicção?", o: ["Defeito oculto na coisa.", "Perda da coisa por decisão judicial.", "Desistência do contrato."], a: 1 }
+        ];
+        
+        let currentQ = 0;
+        let selectedOption = null;
+
+        function initQuiz() {
+            currentQ = 0;
+            document.getElementById('quiz-success').classList.add('hidden');
+            document.getElementById('quiz-container').classList.remove('hidden');
+            document.getElementById('quiz-container').classList.add('flex');
+            renderQuestion();
         }
 
-        function openPaywall() {
-            const modal = document.getElementById('paywall-modal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
+        function renderQuestion() {
+            selectedOption = null;
+            document.getElementById('quiz-progress').style.width = ((currentQ / questoes.length) * 100) + '%';
+            document.getElementById('quiz-question').innerText = questoes[currentQ].q;
+            
+            const btn = document.getElementById('quiz-btn');
+            btn.className = "w-full py-4 bg-slate-200 text-slate-400 font-black rounded-xl btn-3d pointer-events-none mt-4";
+            btn.innerText = "VERIFICAR";
+            btn.onclick = checkAnswer;
+
+            let html = '';
+            questoes[currentQ].o.forEach((opt, idx) => {
+                html += `<button onclick="selectOption(this, ${idx})" class="quiz-opt w-full text-left p-4 rounded-xl border-2 border-slate-200 font-bold text-slate-600 transition-all hover:bg-slate-50">${opt}</button>`;
+            });
+            document.getElementById('quiz-options').innerHTML = html;
+        }
+
+        function selectOption(el, idx) {
+            document.querySelectorAll('.quiz-opt').forEach(b => { b.classList.remove('border-law-primary', 'bg-green-50', 'text-law-primary'); b.classList.add('border-slate-200', 'text-slate-600'); });
+            el.classList.remove('border-slate-200', 'text-slate-600');
+            el.classList.add('border-law-primary', 'bg-green-50', 'text-law-primary');
+            selectedOption = idx;
+            
+            const btn = document.getElementById('quiz-btn');
+            btn.classList.remove('bg-slate-200', 'text-slate-400', 'pointer-events-none');
+            btn.classList.add('bg-law-primary', 'text-white', 'border-[#024a35]');
+        }
+
+        function checkAnswer() {
+            const correctIdx = questoes[currentQ].a;
+            const optionsArr = document.querySelectorAll('.quiz-opt');
+            
+            if(selectedOption === correctIdx) {
+                // ACERTOU
+                playSound('sfx-success');
+                optionsArr[selectedOption].classList.add('correct-answer');
+                
+                const btn = document.getElementById('quiz-btn');
+                btn.className = "w-full py-4 bg-green-500 text-white font-black rounded-xl btn-3d border-green-700 mt-4";
+                btn.innerText = "CONTINUAR";
+                btn.onclick = nextQuestion;
+            } else {
+                // ERROU
+                playSound('sfx-error');
+                const wrongBtn = optionsArr[selectedOption];
+                wrongBtn.classList.add('shake-error');
+                setTimeout(() => wrongBtn.classList.remove('shake-error'), 500);
+            }
+        }
+
+        function nextQuestion() {
+            currentQ++;
+            if(currentQ < questoes.length) {
+                renderQuestion();
+            } else {
+                // FIM DO QUIZ
+                document.getElementById('quiz-container').classList.add('hidden');
+                document.getElementById('quiz-container').classList.remove('flex');
+                document.getElementById('quiz-success').classList.remove('hidden');
+                document.getElementById('quiz-success').classList.add('flex');
+                document.getElementById('quiz-progress').style.width = '100%';
+                shootConfetti();
+                playSound('sfx-success');
+            }
+        }
+
+        // CONFETI NATIVO (Sem bibliotecas)
+        function shootConfetti() {
+            const colors = ['#047857', '#f97316', '#fbbf24', '#3b82f6'];
+            for(let i=0; i<50; i++) {
+                const conf = document.createElement('div');
+                conf.style.position = 'fixed'; conf.style.width = '10px'; conf.style.height = '10px';
+                conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                conf.style.left = '50%'; conf.style.top = '50%'; conf.style.zIndex = '300';
+                conf.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                document.body.appendChild(conf);
+
+                const angle = Math.random() * Math.PI * 2;
+                const velocity = 10 + Math.random() * 20;
+                let x = 0, y = 0, opacity = 1;
+
+                function animateConfetti() {
+                    x += Math.cos(angle) * velocity;
+                    y += Math.sin(angle) * velocity + 5; // Gravidade
+                    opacity -= 0.02;
+                    conf.style.transform = `translate(${x}px, ${y}px) rotate(${x}deg)`;
+                    conf.style.opacity = opacity;
+                    if(opacity > 0) requestAnimationFrame(animateConfetti);
+                    else conf.remove();
+                }
+                animateConfetti();
+            }
+        }
+
+        // ANIMAÇÃO DO SIMULADO (Contagem Regressiva)
+        function startCountdown() {
+            const overlay = document.getElementById('countdown-overlay');
+            const num = document.getElementById('countdown-number');
+            overlay.classList.remove('hidden'); overlay.classList.add('flex');
+            
+            playSound('sfx-countdown');
+            
+            let count = 3;
+            num.innerText = count;
+            
+            const interval = setInterval(() => {
+                count--;
+                if(count > 0) {
+                    num.innerText = count;
+                    num.style.animation = 'none'; num.offsetHeight; num.style.animation = 'popIn 0.5s ease-out';
+                } else {
+                    clearInterval(interval);
+                    num.innerText = "VAI!";
+                    setTimeout(() => {
+                        overlay.classList.add('hidden'); overlay.classList.remove('flex');
+                        alert("Iniciando Prova da UNICV no banco de dados Fiqon...");
+                    }, 1000);
+                }
+            }, 1000);
         }
     </script>
 </body>
