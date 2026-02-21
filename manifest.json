@@ -1,0 +1,16 @@
+{
+  "name": "DiploFácil",
+  "short_name": "DiploFácil",
+  "description": "O seu caminho no Direito.",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#fdfaf5",
+  "theme_color": "#630d0d",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3233/3233504.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
