@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>DiploFácil - UNICV</title>
     <meta name="theme-color" content="#047857">
+
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3233/3233504.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -166,7 +172,7 @@
                 </div>
             </div>
 
-            <div id="resumo-falta" class="bg-white rounded-3xl p-5 shadow-xl border-2 border-red-100">
+            <div id="resumo-falta" class="bg-white rounded-3xl p-5 shadow-xl border-2 border-red-100 hidden">
                 <div class="flex justify-between items-start mb-4">
                     <div>
                         <span class="bg-red-100 text-red-600 text-[10px] font-black px-2 py-1 rounded-full uppercase">Falta - Dia 17/02</span>
@@ -342,7 +348,9 @@
             <i class="fas fa-rocket"></i>
         </button>
 
-    </div> <div id="screen-quiz" class="deep-screen">
+    </div> 
+
+    <div id="screen-quiz" class="deep-screen">
         <div class="px-5 py-4 flex items-center gap-4 bg-white border-b shadow-sm sticky top-0 z-10">
             <button onclick="closeDeepScreen('screen-quiz')" class="text-slate-400 text-2xl"><i class="fas fa-times"></i></button>
             <div class="flex-1 bg-slate-100 h-4 rounded-full overflow-hidden p-0.5">
@@ -354,8 +362,7 @@
         <div class="flex-1 px-5 py-8 flex flex-col" id="quiz-container">
             <h2 class="text-2xl font-black text-slate-800 mb-8 leading-snug" id="quiz-question">O que é um contrato segundo a doutrina?</h2>
             
-            <div class="space-y-4 w-full" id="quiz-options">
-                </div>
+            <div class="space-y-4 w-full" id="quiz-options"></div>
             
             <div class="mt-auto pt-8">
                 <button id="quiz-btn" onclick="checkAnswer()" class="w-full py-4 bg-slate-200 text-slate-400 font-black rounded-xl btn-3d pointer-events-none">VERIFICAR</button>
@@ -455,8 +462,21 @@
         </div>
     </div>
 
+    <div id="ios-prompt" class="fixed bottom-6 left-4 right-4 bg-white p-5 rounded-3xl shadow-2xl z-[500] hidden border-2 border-law-primary transform transition-transform translate-y-full duration-300">
+        <div class="flex items-start gap-4">
+            <div class="w-12 h-12 bg-law-primary text-white rounded-2xl flex items-center justify-center text-2xl flex-shrink-0 shadow-md">
+                <i class="fas fa-owl"></i>
+            </div>
+            <div class="flex-1">
+                <h3 class="font-black text-slate-800 text-base leading-tight">Instale o DiploFácil</h3>
+                <p class="text-xs text-slate-500 mt-1 font-medium">Toque em <i class="fas fa-external-link-square-alt mx-1 text-slate-800"></i> e depois em <b>"Adicionar à Tela de Início"</b>.</p>
+            </div>
+            <button onclick="closeIOSPrompt()" class="text-slate-300 hover:text-slate-500"><i class="fas fa-times text-xl"></i></button>
+        </div>
+        <div class="absolute -bottom-3 left-1/2 -translate-x-1/2 w-5 h-5 bg-white border-b-2 border-r-2 border-law-primary transform rotate-45"></div>
+    </div>
+
     <script>
-        // CORE: Login & Checkin
         function doLogin() {
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('checkin-modal').classList.remove('hidden');
@@ -470,7 +490,6 @@
             else navigate('faltas');
         }
 
-        // CORE: Navegação Abas vs Deep Screens
         function navigate(screenId) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById('screen-' + screenId).classList.add('active');
@@ -486,13 +505,11 @@
         function closeDeepScreen(id) { document.getElementById(id).classList.remove('open'); }
         function openPaywall() { document.getElementById('paywall-modal').classList.remove('hidden'); document.getElementById('paywall-modal').classList.add('flex'); }
 
-        // AUDIO SYSTEM
         function playSound(id) {
-            try { const audio = document.getElementById(id); audio.currentTime = 0; audio.play().catch(e => console.log("Áudio bloqueado pelo browser")); } 
+            try { const audio = document.getElementById(id); audio.currentTime = 0; audio.play().catch(e => console.log("Áudio bloqueado")); } 
             catch(e) {}
         }
 
-        // GAME: Quiz de Contratos
         const questoes = [
             { q: "Qual a natureza de um Contrato?", o: ["Ato Ilícito", "Negócio Jurídico Bilateral", "Declaração Unilateral"], a: 1 },
             { q: "O Brasil adota a Teoria da Agnição em qual modalidade?", o: ["Declaração", "Recepção", "Expedição"], a: 2 },
@@ -546,7 +563,6 @@
             const optionsArr = document.querySelectorAll('.quiz-opt');
             
             if(selectedOption === correctIdx) {
-                // ACERTOU
                 playSound('sfx-success');
                 optionsArr[selectedOption].classList.add('correct-answer');
                 
@@ -555,7 +571,6 @@
                 btn.innerText = "CONTINUAR";
                 btn.onclick = nextQuestion;
             } else {
-                // ERROU
                 playSound('sfx-error');
                 const wrongBtn = optionsArr[selectedOption];
                 wrongBtn.classList.add('shake-error');
@@ -568,7 +583,6 @@
             if(currentQ < questoes.length) {
                 renderQuestion();
             } else {
-                // FIM DO QUIZ
                 document.getElementById('quiz-container').classList.add('hidden');
                 document.getElementById('quiz-container').classList.remove('flex');
                 document.getElementById('quiz-success').classList.remove('hidden');
@@ -579,7 +593,6 @@
             }
         }
 
-        // CONFETI NATIVO (Sem bibliotecas)
         function shootConfetti() {
             const colors = ['#047857', '#f97316', '#fbbf24', '#3b82f6'];
             for(let i=0; i<50; i++) {
@@ -596,7 +609,7 @@
 
                 function animateConfetti() {
                     x += Math.cos(angle) * velocity;
-                    y += Math.sin(angle) * velocity + 5; // Gravidade
+                    y += Math.sin(angle) * velocity + 5; 
                     opacity -= 0.02;
                     conf.style.transform = `translate(${x}px, ${y}px) rotate(${x}deg)`;
                     conf.style.opacity = opacity;
@@ -607,7 +620,6 @@
             }
         }
 
-        // ANIMAÇÃO DO SIMULADO (Contagem Regressiva)
         function startCountdown() {
             const overlay = document.getElementById('countdown-overlay');
             const num = document.getElementById('countdown-number');
@@ -633,6 +645,25 @@
                 }
             }, 1000);
         }
+
+        // DETECTOR DE iOS (A Mágica da Tela Inicial)
+        function checkIOS() {
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            const isStandalone = window.navigator.standalone === true; 
+            
+            if (isIOS && !isStandalone) {
+                const prompt = document.getElementById('ios-prompt');
+                prompt.classList.remove('hidden');
+                setTimeout(() => { prompt.classList.remove('translate-y-full'); }, 2000);
+            }
+        }
+
+        function closeIOSPrompt() {
+            document.getElementById('ios-prompt').classList.add('translate-y-full');
+            setTimeout(() => { document.getElementById('ios-prompt').classList.add('hidden'); }, 300);
+        }
+
+        window.addEventListener('load', checkIOS);
     </script>
 </body>
 </html>
